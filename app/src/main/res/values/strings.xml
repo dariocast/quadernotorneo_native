@@ -5,4 +5,5 @@
     <string name="cancel">Cancel</string>
     <string name="action_refresh">Refresh</string>
     <string name="elimina_partita">Elimina</string>
+    <string name="crea_pdf">Crea PDF</string>
 </resources>

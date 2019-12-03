@@ -17,7 +17,6 @@ import it.dariocast.quadernotorneo.models.Partita;
 
 class PartiteAdapter extends RecyclerView.Adapter<PartiteAdapter.PartitaViewHolder>{
     private List<Partita> partite;
-    public OnBindCallback onBind;
 
 
     // Provide a reference to the views for each data item
@@ -57,9 +56,7 @@ class PartiteAdapter extends RecyclerView.Adapter<PartiteAdapter.PartitaViewHold
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(PartitaViewHolder holder, int position) {
-        if (onBind != null) {
-            onBind.onViewBound(holder, position);
-        }
+
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Partita partita = partite.get(position);

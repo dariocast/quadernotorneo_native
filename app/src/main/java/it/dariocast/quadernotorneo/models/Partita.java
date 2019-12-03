@@ -13,6 +13,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+
 import it.dariocast.quadernotorneo.utils.Utils;
 
 public class Partita {
@@ -46,7 +48,7 @@ public class Partita {
                             Toast.makeText(ctx, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
-                        Toast.makeText(ctx, "Squadra creata con successo", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ctx, "Partita creata con successo", Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -159,5 +161,19 @@ public class Partita {
     public Partita(String squadraUno, String squadraDue) {
         this.squadraUno = squadraUno;
         this.squadraDue = squadraDue;
+    }
+
+    @Override
+    public String toString() {
+        return "Partita{" +
+                "id=" + id +
+                ", squadraUno='" + squadraUno + '\'' +
+                ", squadraDue='" + squadraDue + '\'' +
+                ", golSquadraUno=" + golSquadraUno +
+                ", golSquadraDue=" + golSquadraDue +
+                ", marcatori=" + Arrays.toString(marcatori) +
+                ", ammoniti=" + Arrays.toString(ammoniti) +
+                ", espulsi=" + Arrays.toString(espulsi) +
+                '}';
     }
 }

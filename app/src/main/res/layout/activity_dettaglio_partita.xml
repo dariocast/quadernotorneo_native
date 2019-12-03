@@ -4,19 +4,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DettaglioPartita">
-    <TextView
-        android:id="@+id/id_tv"
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_uno"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tab_due"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:scrollbars="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:id="@+id/recyclerViewGiocatori"
+        android:layout_alignTop="@id/tabLayout"/>
 
-    <Button
-        android:id="@+id/btn_cancella"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/elimina_partita" />
+        android:orientation="horizontal"
+        android:gravity="center">
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_crea_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/crea_pdf"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancella"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/elimina_partita"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+
+    </LinearLayout>
 </RelativeLayout>
