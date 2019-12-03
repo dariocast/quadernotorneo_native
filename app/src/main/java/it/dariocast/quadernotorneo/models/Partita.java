@@ -39,12 +39,19 @@ public class Partita {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        try {
+                            int createdId = response.getJSONObject("data").getInt("id");
+                            id = createdId;
+                        } catch (JSONException e) {
+                            Toast.makeText(ctx, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
                         Toast.makeText(ctx, "Squadra creata con successo", Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ctx, "Impossibile caricare le partite, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, "Impossibile creare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -139,11 +146,7 @@ public class Partita {
     private int[] ammoniti;
     private int[] espulsi;
 
-    private static int idCounter = 1;
-
     public Partita(String squadraUno, String squadraDue, int golSquadraUno, int golSquadraDue, int[] marcatori, int[] ammoniti, int[] espulsi) {
-        this.id = Partita.idCounter;
-        idCounter++;
         this.squadraUno = squadraUno;
         this.squadraDue = squadraDue;
         this.golSquadraUno = golSquadraUno;
@@ -154,8 +157,6 @@ public class Partita {
     }
 
     public Partita(String squadraUno, String squadraDue) {
-        this.id = Partita.idCounter;
-        idCounter++;
         this.squadraUno = squadraUno;
         this.squadraDue = squadraDue;
     }
