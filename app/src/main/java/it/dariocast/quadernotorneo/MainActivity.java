@@ -9,6 +9,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,11 +96,8 @@ public class MainActivity extends AppCompatActivity {
                 spinner2.setAdapter(adapter);
                 dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Partita nuova = new Partita(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString());
                         try {
-                            nuova.persistOnDb(getApplicationContext());
-                            partite.add(nuova);
-                            mAdapter.notifyDataSetChanged();
+                            creaPartita(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString());
                         } catch (JSONException e) {
                             Toast.makeText(MainActivity.this, "Errore durante la creazione. Riprova", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
@@ -115,6 +114,39 @@ public class MainActivity extends AppCompatActivity {
                 dialogBuilder.show();
             }
         });
+    }
+
+    private void creaPartita(String squadra1, String squadra2) throws JSONException {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url ="https://dariocast.altervista.org/fantazama/api/partita/create.php";
+
+        JSONObject jsonRepr = new JSONObject();
+        jsonRepr.put("squadraUno",squadra1);
+        jsonRepr.put("squadraDue",squadra2);
+        // Request a string response from the provided URL.
+        JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url, jsonRepr,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            partite.add(new Partita(response.getJSONObject("partita")));
+                            mAdapter.notifyDataSetChanged();
+                            Toast.makeText(getApplicationContext(), "Partita creata con successo", Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(getApplicationContext(), "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Impossibile creare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
     }
 
     private void loadGruppi() {

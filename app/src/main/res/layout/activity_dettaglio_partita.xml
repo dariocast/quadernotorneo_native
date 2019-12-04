@@ -6,6 +6,76 @@
     tools:context=".DettaglioPartita">
 
     <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/ll_btn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:padding="10dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_alignParentStart="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_gol"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gol"
+                    style="@style/Widget.MaterialComponents.Button"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ammonisci"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ammonisci"
+                    style="@style/Widget.MaterialComponents.Button"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_espelli"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/espelli"
+                    style="@style/Widget.MaterialComponents.Button"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_alignParentEnd="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_gol_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gol"
+                    style="@style/Widget.MaterialComponents.Button"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_ammonisci_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ammonisci"
+                    style="@style/Widget.MaterialComponents.Button"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_espelli_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/espelli"
+                    style="@style/Widget.MaterialComponents.Button"/>
+            </LinearLayout>
+        </RelativeLayout>
+        <ImageView
+            android:id="@+id/iv_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitStart"
+            android:src="@drawable/blocnotes"
+            android:contentDescription="@string/quaderno" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -14,18 +84,24 @@
         android:gravity="center">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_crea_pdf"
+            android:id="@+id/btn_salva"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/crea_pdf"
+            android:text="@string/salva"
             style="@style/Widget.MaterialComponents.Button.TextButton"/>
-
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancella"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/elimina_partita"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_crea_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/crea_pdf"
             style="@style/Widget.MaterialComponents.Button.TextButton"/>
 
 

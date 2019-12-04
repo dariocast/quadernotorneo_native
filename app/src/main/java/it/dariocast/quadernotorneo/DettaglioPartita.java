@@ -3,6 +3,7 @@ package it.dariocast.quadernotorneo;
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import it.dariocast.quadernotorneo.models.Giocatore;
@@ -58,38 +60,64 @@ public class DettaglioPartita extends AppCompatActivity {
         btnCancella.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Instantiate the RequestQueue.
-                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                String url ="https://dariocast.altervista.org/fantazama/api/partita/delete.php?id="+id;
-                // Request a string response from the provided URL.
-                JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
-                        new Response.Listener<JSONObject>() {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(DettaglioPartita.this);
+                dialogBuilder.setTitle("Elimina")
+                        .setMessage("Vuoi eliminare questa partita?")
+                        .setCancelable(true)
+                        .setPositiveButton("Elimina", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    String message = response.getString("message");
-                                    Toast.makeText(DettaglioPartita.this, message, Toast.LENGTH_SHORT).show();
-                                    setResult(RESULT_OK);
-                                    finish();
-                                } catch (JSONException e) {
-                                    Toast.makeText(DettaglioPartita.this, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(DettaglioPartita.this, "Impossibile eliminare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Instantiate the RequestQueue.
+                                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                                String url ="https://dariocast.altervista.org/fantazama/api/partita/delete.php?id="+id;
+                                // Request a string response from the provided URL.
+                                JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
+                                        new Response.Listener<JSONObject>() {
+                                            @Override
+                                            public void onResponse(JSONObject response) {
+                                                try {
+                                                    boolean success = response.getBoolean("deleted");
+                                                    if(success) {
+                                                        Toast.makeText(DettaglioPartita.this, "Partita eliminata con successo", Toast.LENGTH_SHORT).show();
+                                                        setResult(RESULT_OK);
+                                                        finish();
+                                                    }
+                                                } catch (JSONException e) {
+                                                    Toast.makeText(DettaglioPartita.this, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Toast.makeText(DettaglioPartita.this, "Impossibile eliminare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
 
-                // Add the request to the RequestQueue.
-                queue.add(stringRequest);
+                                // Add the request to the RequestQueue.
+                                queue.add(stringRequest);
+                            }
+                        })
+                        .setNegativeButton("Cancella", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                dialogBuilder.show();
             }
         });
 
-        MaterialButton btnPdf = findViewById(R.id.btn_crea_pdf);
-        btnPdf.setOnClickListener(new View.OnClickListener() {
+        MaterialButton btnSalva = findViewById(R.id.btn_salva);
+        btnSalva.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                salva();
+            }
+        });
+
+        MaterialButton btnPDF = findViewById(R.id.btn_crea_pdf);
+        btnPDF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 exportToPDF();
@@ -104,6 +132,41 @@ public class DettaglioPartita extends AppCompatActivity {
 
     }
 
+    private void salva() {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url ="https://dariocast.altervista.org/fantazama/api/partita/update.php";
+
+        // Request a string response from the provided URL.
+        JsonObjectRequest stringRequest = null;
+        try {
+            stringRequest = new JsonObjectRequest(Request.Method.POST, url, partita.toJSONObject(),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if(response.getBoolean("updated"))
+                                    Toast.makeText(getApplicationContext(), "Partita salvata con successo", Toast.LENGTH_SHORT).show();
+                                else
+                                    Toast.makeText(getApplicationContext(), "Partita NON salvata", Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                Toast.makeText(getApplicationContext(), "Impossibile salvare la partita, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getApplicationContext(), "Impossibile salvare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            queue.add(stringRequest);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Impossibile salvare la partita, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void getById(int id) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
@@ -116,7 +179,7 @@ public class DettaglioPartita extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            partita = new Partita(response.getJSONObject("partita"));
+                            partita = new Partita(response);
                             getGiocatori();
                         } catch (JSONException e) {
                             Toast.makeText(getApplicationContext(), "Impossibile caricare la partita, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -210,7 +273,7 @@ public class DettaglioPartita extends AppCompatActivity {
                         try {
                             giocatoriSquadraUno.clear();
                             for (int i = 0; i < response.length(); i++) {
-                                Giocatore toInsert = new Giocatore(response.getJSONObject(i));
+                                Giocatore toInsert = new Giocatore(response.getString(i), partita.getSquadraUno());
                                 giocatoriSquadraUno.add(toInsert);
                             }
                         } catch (JSONException e) {
@@ -228,7 +291,7 @@ public class DettaglioPartita extends AppCompatActivity {
         // Add the request to the RequestQueue.
         queue.add(jsonArrayRequest);
 
-        url ="https://dariocast.altervista.org/fantazama/api/giocatore/getGruppo.php?gruppo="+partita.getSquadraDue();
+        url ="https://dariocast.altervista.org/fantazama/api/giocatore/getGiocatoriPerGruppo.php?gruppo="+partita.getSquadraDue();
 
         // Request a string response from the provided URL.
         jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
@@ -238,7 +301,7 @@ public class DettaglioPartita extends AppCompatActivity {
                         try {
                             giocatoriSquadraDue.clear();
                             for (int i = 0; i < response.length(); i++) {
-                                Giocatore toInsert = new Giocatore(response.getJSONObject(i));
+                                Giocatore toInsert = new Giocatore(response.getString(i), partita.getSquadraDue());
                                 giocatoriSquadraDue.add(toInsert);
                             }
                         } catch (JSONException e) {
