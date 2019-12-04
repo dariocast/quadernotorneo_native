@@ -10,21 +10,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import it.dariocast.quadernotorneo.utils.Utils;
-
 public class Partita {
     public Partita(JSONObject jsonObject) throws JSONException {
-        this.id = jsonObject.getInt("id");
-        this.squadraUno = jsonObject.getString("squadra_uno");
-        this.squadraDue = jsonObject.getString("squadra_due");
-        this.golSquadraUno = jsonObject.getInt("gol_squadra_uno");
-        this.golSquadraDue = jsonObject.getInt("gol_squadra_due");
-        this.marcatori = Utils.stringToIntArray(jsonObject.getString("marcatori"));
-        this.ammoniti = Utils.stringToIntArray(jsonObject.getString("ammoniti"));
-        this.espulsi = Utils.stringToIntArray(jsonObject.getString("espulsi"));
+        this.id = jsonObject.getInt("_id");
+        this.squadraUno = jsonObject.getString("squadraUno");
+        this.squadraDue = jsonObject.getString("squadraDue");
+        this.golSquadraUno = jsonObject.getInt("golSquadraUno");
+        this.golSquadraDue = jsonObject.getInt("golSquadraDue");
+        this.marcatori = jsonObject.getJSONArray("marcatori");
+        this.ammoniti = jsonObject.getJSONArray("ammoniti");
+        this.espulsi = jsonObject.getJSONArray("espulsi");
     }
 
     public void persistOnDb(final Context ctx) throws JSONException {
@@ -32,37 +31,31 @@ public class Partita {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String url ="https://dariocast.altervista.org/fantazama/api/partita/create.php";
 
-        JSONObject jsonRepr = this.toJson();
-
+        JSONObject jsonRepr = new JSONObject();
+        jsonRepr.put("squadraUno",getSquadraUno());
+        jsonRepr.put("squadraDue",getSquadraDue());
         // Request a string response from the provided URL.
         JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url, jsonRepr,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Toast.makeText(ctx, "Squadra creata con successo", Toast.LENGTH_SHORT).show();
+                        try {
+                            id = response.getJSONObject("partita").getInt("_id");
+                        } catch (JSONException e) {
+                            Toast.makeText(ctx, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                        Toast.makeText(ctx, "Partita creata con successo", Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ctx, "Impossibile caricare le partite, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, "Impossibile creare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
-    }
-
-    private JSONObject toJson() throws JSONException {
-        JSONObject toReturn = new JSONObject();
-        toReturn.put("id",getId());
-        toReturn.put("squadra_uno",getSquadraUno());
-        toReturn.put("squadra_due",getSquadraDue());
-        toReturn.put("gol_squadra_uno",getGolSquadraUno());
-        toReturn.put("gol_squadra_due",getGolSquadraDue());
-        toReturn.put("marcatori",getMarcatori());
-        toReturn.put("ammoniti",getAmmoniti());
-        toReturn.put("espulsi",getEspulsi());
-        return toReturn;
     }
 
     public int getId() {
@@ -105,27 +98,27 @@ public class Partita {
         this.golSquadraDue = golSquadraDue;
     }
 
-    public int[] getMarcatori() {
+    public JSONArray getMarcatori() {
         return marcatori;
     }
 
-    public void setMarcatori(int[] marcatori) {
+    public void setMarcatori(JSONArray marcatori) {
         this.marcatori = marcatori;
     }
 
-    public int[] getAmmoniti() {
+    public JSONArray getAmmoniti() {
         return ammoniti;
     }
 
-    public void setAmmoniti(int[] ammoniti) {
+    public void setAmmoniti(JSONArray ammoniti) {
         this.ammoniti = ammoniti;
     }
 
-    public int[] getEspulsi() {
+    public JSONArray getEspulsi() {
         return espulsi;
     }
 
-    public void setEspulsi(int[] espulsi) {
+    public void setEspulsi(JSONArray espulsi) {
         this.espulsi = espulsi;
     }
 
@@ -135,15 +128,11 @@ public class Partita {
     private String squadraDue;
     private int golSquadraUno;
     private int golSquadraDue;
-    private int[] marcatori;
-    private int[] ammoniti;
-    private int[] espulsi;
+    private JSONArray marcatori;
+    private JSONArray ammoniti;
+    private JSONArray espulsi;
 
-    private static int idCounter = 1;
-
-    public Partita(String squadraUno, String squadraDue, int golSquadraUno, int golSquadraDue, int[] marcatori, int[] ammoniti, int[] espulsi) {
-        this.id = Partita.idCounter;
-        idCounter++;
+    public Partita(String squadraUno, String squadraDue, int golSquadraUno, int golSquadraDue, JSONArray marcatori, JSONArray ammoniti, JSONArray espulsi) {
         this.squadraUno = squadraUno;
         this.squadraDue = squadraDue;
         this.golSquadraUno = golSquadraUno;
@@ -154,9 +143,23 @@ public class Partita {
     }
 
     public Partita(String squadraUno, String squadraDue) {
-        this.id = Partita.idCounter;
-        idCounter++;
         this.squadraUno = squadraUno;
         this.squadraDue = squadraDue;
+    }
+
+
+    public String printA4() {
+        return squadraUno + "\t" +
+                golSquadraUno +
+                ":" +
+                golSquadraDue +
+                "\t" +
+                squadraDue +
+                "\r\n" +
+                marcatori.toString() +
+                "- - - - - - - - - - - - - -\r\n" +
+                ammoniti.toString() +
+                "- - - - - - - - - - - - - -\r\n" +
+                espulsi.toString();
     }
 }

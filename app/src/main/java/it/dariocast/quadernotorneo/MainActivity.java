@@ -1,6 +1,7 @@
 package it.dariocast.quadernotorneo;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.android.volley.Request;
@@ -11,6 +12,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -38,6 +40,14 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     List<Partita> partite;
     List<String> gruppi;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1 && resultCode == RESULT_OK) {
+            loadPartite();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         Partita nuova = new Partita(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString());
                         try {
-                            nuova.persistOnDb(MainActivity.this);
+                            nuova.persistOnDb(getApplicationContext());
                             partite.add(nuova);
                             mAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
@@ -109,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadGruppi() {
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String url ="https://dariocast.altervista.org/fantazama/api/giocatore/getNomiGruppi.php";
 
         // Request a string response from the provided URL.
@@ -141,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadPartite() {
         // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String url ="https://dariocast.altervista.org/fantazama/api/partita/getAll.php";
 
         // Request a string response from the provided URL.

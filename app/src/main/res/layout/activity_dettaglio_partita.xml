@@ -4,10 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".DettaglioPartita">
-    <TextView
-        android:id="@+id/id_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_crea_pdf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/crea_pdf"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancella"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/elimina_partita"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+
+    </LinearLayout>
 </RelativeLayout>

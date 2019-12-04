@@ -1,5 +1,6 @@
 package it.dariocast.quadernotorneo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import it.dariocast.quadernotorneo.models.Partita;
 
 class PartiteAdapter extends RecyclerView.Adapter<PartiteAdapter.PartitaViewHolder>{
     private List<Partita> partite;
+
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -54,6 +56,7 @@ class PartiteAdapter extends RecyclerView.Adapter<PartiteAdapter.PartitaViewHold
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(PartitaViewHolder holder, int position) {
+
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         final Partita partita = partite.get(position);
@@ -68,7 +71,7 @@ class PartiteAdapter extends RecyclerView.Adapter<PartiteAdapter.PartitaViewHold
                 Context context = v.getContext();
                 Intent intent = new Intent(context, DettaglioPartita.class);
                 intent.putExtra("idPartita", partita.getId());
-                context.startActivity(intent);
+                ((Activity) context).startActivityForResult(intent, 1);
             }
         });
 
