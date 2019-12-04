@@ -1,12 +1,5 @@
 package it.dariocast.quadernotorneo;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import it.dariocast.quadernotorneo.models.Giocatore;
-import it.dariocast.quadernotorneo.models.Partita;
-
 import android.Manifest;
 import android.app.DownloadManager;
 import android.content.Context;
@@ -30,7 +23,6 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.tabs.TabLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,16 +34,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import it.dariocast.quadernotorneo.models.Giocatore;
+import it.dariocast.quadernotorneo.models.Partita;
+
 public class DettaglioPartita extends AppCompatActivity {
     private static final String TAG = "DettaglioPartita";
     int id;
     Partita partita;
-    TabLayout tabLayout;
     List<Giocatore> giocatoriSquadraUno;
     List<Giocatore> giocatoriSquadraDue;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,20 +53,6 @@ public class DettaglioPartita extends AppCompatActivity {
 
         giocatoriSquadraUno = new ArrayList<>();
         giocatoriSquadraDue = new ArrayList<>();
-
-        recyclerView = findViewById(R.id.recyclerViewGiocatori);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        mAdapter = new GiocatoriAdapter(giocatoriSquadraUno);
-        recyclerView.setAdapter(mAdapter);
-
-        setupView();
 
         MaterialButton btnCancella = findViewById(R.id.btn_cancella);
         btnCancella.setOnClickListener(new View.OnClickListener() {
@@ -137,10 +116,8 @@ public class DettaglioPartita extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            partita = new Partita(response.getJSONObject("data"));
+                            partita = new Partita(response.getJSONObject("partita"));
                             getGiocatori();
-                            tabLayout.getTabAt(0).setText(partita.getSquadraUno());
-                            tabLayout.getTabAt(1).setText(partita.getSquadraDue());
                         } catch (JSONException e) {
                             Toast.makeText(getApplicationContext(), "Impossibile caricare la partita, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
@@ -157,35 +134,6 @@ public class DettaglioPartita extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    private void setupView() {
-        tabLayout = findViewById(R.id.tabLayout);
-        tabLayout.getTabAt(0).select();
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 0:
-                        mAdapter = new GiocatoriAdapter(giocatoriSquadraUno);
-                        recyclerView.setAdapter(mAdapter);
-                        break;
-                    case 1:
-                        mAdapter = new GiocatoriAdapter(giocatoriSquadraDue);
-                        recyclerView.setAdapter(mAdapter);
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-    }
 
     private  void exportToPDF() {
         if(isStoragePermissionGranted()) {
@@ -203,14 +151,12 @@ public class DettaglioPartita extends AppCompatActivity {
 
                 PdfDocument document = new PdfDocument();
                 PdfDocument.PageInfo pageInfo = new
-                        PdfDocument.PageInfo.Builder(100, 100, 1).create();
+                        PdfDocument.PageInfo.Builder(595, 842, 1).create();
                 PdfDocument.Page page = document.startPage(pageInfo);
                 Canvas canvas = page.getCanvas();
                 Paint paint = new Paint();
 
-                canvas.drawText(partita.toString(), 10, 10, paint);
-
-
+                canvas.drawText(partita.printA4(), 10, 10, paint);
 
                 document.finishPage(page);
                 document.writeTo(fOut);
@@ -254,7 +200,7 @@ public class DettaglioPartita extends AppCompatActivity {
     public void getGiocatori() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url ="https://dariocast.altervista.org/fantazama/api/giocatore/getGruppo.php?gruppo="+partita.getSquadraUno();
+        String url ="https://dariocast.altervista.org/fantazama/api/giocatore/getGiocatoriPerGruppo.php?gruppo="+partita.getSquadraUno();
 
         // Request a string response from the provided URL.
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
@@ -267,7 +213,6 @@ public class DettaglioPartita extends AppCompatActivity {
                                 Giocatore toInsert = new Giocatore(response.getJSONObject(i));
                                 giocatoriSquadraUno.add(toInsert);
                             }
-                            mAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             Toast.makeText(DettaglioPartita.this, "Impossibile caricare i giocatori", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
@@ -296,7 +241,6 @@ public class DettaglioPartita extends AppCompatActivity {
                                 Giocatore toInsert = new Giocatore(response.getJSONObject(i));
                                 giocatoriSquadraDue.add(toInsert);
                             }
-                            mAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             Toast.makeText(DettaglioPartita.this, "Impossibile caricare i giocatori", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();

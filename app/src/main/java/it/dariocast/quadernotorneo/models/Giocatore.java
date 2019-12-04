@@ -26,7 +26,7 @@ public class Giocatore {
     }
 
     public Giocatore(JSONObject jsonObject) throws JSONException {
-        this.id = jsonObject.getInt("id");
+        this.id = jsonObject.getInt("_id");
         this.nome = jsonObject.getString("nome");
         this.gruppo = jsonObject.getString("gruppo");
         this.ruolo = jsonObject.getString("ruolo");
