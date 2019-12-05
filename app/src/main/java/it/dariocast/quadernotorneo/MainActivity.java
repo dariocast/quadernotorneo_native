@@ -72,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new PartiteAdapter(partite);
         recyclerView.setAdapter(mAdapter);
 
-        loadPartite();
-        loadGruppi();
-
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,5 +233,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPartite();
+        loadGruppi();
     }
 }

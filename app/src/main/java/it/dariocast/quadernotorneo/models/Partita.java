@@ -126,7 +126,7 @@ public class Partita {
 
         jsonObject.put("_id", getId());
         jsonObject.put("squadraUno", getSquadraUno());
-        jsonObject.put("squadraDue", getGolSquadraDue());
+        jsonObject.put("squadraDue", getSquadraDue());
         jsonObject.put("golSquadraUno", getGolSquadraUno());
         jsonObject.put("golSquadraDue", getGolSquadraDue());
         jsonObject.put("marcatori", getMarcatori());
