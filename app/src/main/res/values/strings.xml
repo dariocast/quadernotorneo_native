@@ -6,4 +6,9 @@
     <string name="action_refresh">Refresh</string>
     <string name="elimina_partita">Elimina</string>
     <string name="crea_pdf">Crea PDF</string>
+    <string name="gol">Gol</string>
+    <string name="ammonisci">Ammonisci</string>
+    <string name="espelli">Espelli</string>
+    <string name="quaderno">Quaderno del Torneo</string>
+    <string name="salva">Salva</string>
 </resources>

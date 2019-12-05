@@ -1,15 +1,5 @@
 package it.dariocast.quadernotorneo.models;
 
-import android.content.Context;
-import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,38 +14,6 @@ public class Partita {
         this.marcatori = jsonObject.getJSONArray("marcatori");
         this.ammoniti = jsonObject.getJSONArray("ammoniti");
         this.espulsi = jsonObject.getJSONArray("espulsi");
-    }
-
-    public void persistOnDb(final Context ctx) throws JSONException {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String url ="https://dariocast.altervista.org/fantazama/api/partita/create.php";
-
-        JSONObject jsonRepr = new JSONObject();
-        jsonRepr.put("squadraUno",getSquadraUno());
-        jsonRepr.put("squadraDue",getSquadraDue());
-        // Request a string response from the provided URL.
-        JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url, jsonRepr,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            id = response.getJSONObject("partita").getInt("_id");
-                        } catch (JSONException e) {
-                            Toast.makeText(ctx, "Impossibile ottenere l'id, errore: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                        Toast.makeText(ctx, "Partita creata con successo", Toast.LENGTH_SHORT).show();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ctx, "Impossibile creare la partita, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
     }
 
     public int getId() {
@@ -161,5 +119,20 @@ public class Partita {
                 ammoniti.toString() +
                 "- - - - - - - - - - - - - -\r\n" +
                 espulsi.toString();
+    }
+
+    public JSONObject toJSONObject() throws JSONException{
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("_id", getId());
+        jsonObject.put("squadraUno", getSquadraUno());
+        jsonObject.put("squadraDue", getSquadraDue());
+        jsonObject.put("golSquadraUno", getGolSquadraUno());
+        jsonObject.put("golSquadraDue", getGolSquadraDue());
+        jsonObject.put("marcatori", getMarcatori());
+        jsonObject.put("ammoniti", getAmmoniti());
+        jsonObject.put("espulsi", getEspulsi());
+
+        return jsonObject;
     }
 }
