@@ -29,6 +29,10 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -419,16 +423,22 @@ public class DettaglioPartita extends AppCompatActivity {
                             partita = new Partita(response);
                             MaterialButton gol = findViewById(R.id.btn_gol);
                             gol.setOnClickListener(getGolListener(1));
+
                             MaterialButton gol2 = findViewById(R.id.btn_gol_2);
                             gol2.setOnClickListener(getGolListener(2));
+
                             MaterialButton ammonisci = findViewById(R.id.btn_ammonisci);
                             ammonisci.setOnClickListener(getAmmonizioneListener(1));
+
                             MaterialButton ammonisci2 = findViewById(R.id.btn_ammonisci_2);
                             ammonisci2.setOnClickListener(getAmmonizioneListener(2));
+
                             MaterialButton espelli = findViewById(R.id.btn_espelli);
                             espelli.setOnClickListener(getEspulsioneListener(1));
+
                             MaterialButton espelli2 = findViewById(R.id.btn_espelli_2);
                             espelli2.setOnClickListener(getEspulsioneListener(2));
+
                             updateRisultato();
                             updateListaEventi();
                             getGiocatori();
@@ -449,17 +459,18 @@ public class DettaglioPartita extends AppCompatActivity {
     }
 
     private void updateListaEventi() throws JSONException{
+        listaEventi.clear();
         JSONArray marcatori = partita.getMarcatori();
         for (int i = 0; i<marcatori.length();i++) {
             listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.GOL));
         }
         JSONArray ammoniti = partita.getAmmoniti();
         for (int i = 0; i<ammoniti.length();i++) {
-            listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.AMMONIZIONE));
+            listaEventi.add(new Evento(ammoniti.getJSONObject(i).getString("giocatore"),ammoniti.getJSONObject(i).getString("squadra"), Evento.TipoEvento.AMMONIZIONE));
         }
         JSONArray espulsi = partita.getEspulsi();
         for (int i = 0; i<espulsi.length();i++) {
-            listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.ESPULSIONE));
+            listaEventi.add(new Evento(espulsi.getJSONObject(i).getString("giocatore"),espulsi.getJSONObject(i).getString("squadra"), Evento.TipoEvento.ESPULSIONE));
         }
         eventoAdapter.notifyDataSetChanged();
     }
@@ -474,22 +485,40 @@ public class DettaglioPartita extends AppCompatActivity {
             }
             try {
                 String filename = "partita"+partita.getId()+".pdf";
-                final File file = new File(folder, filename);
-                file.createNewFile();
-                FileOutputStream fOut = new FileOutputStream(file);
+                File file = new File(folder, filename);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                String separator = "-------------------------------";
+                Document document = new Document();
+                PdfWriter.getInstance(document,
+                        new FileOutputStream(file.getAbsoluteFile()));
+                document.open();
+                document.add(new Paragraph(partita.getSquadraUno()));
+                for (int i=0;i<giocatoriSquadraUno.size();i++) {
+                    document.add(new Paragraph(giocatoriSquadraUno.get(i)));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph(partita.getSquadraDue()));
+                for (int i=0;i<giocatoriSquadraDue.size();i++) {
+                    document.add(new Paragraph(giocatoriSquadraDue.get(i)));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Gol"));
+                for (int i=0;i<partita.getMarcatori().length();i++) {
+                    document.add(new Paragraph(partita.getMarcatori().getJSONObject(i).getString("giocatore")));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Ammoniti"));
+                for (int i=0;i<partita.getAmmoniti().length();i++) {
+                    document.add(new Paragraph(partita.getAmmoniti().getJSONObject(i).getString("giocatore")));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Espulsi"));
+                for (int i=0;i<partita.getEspulsi().length();i++) {
+                    document.add(new Paragraph(partita.getEspulsi().getJSONObject(i).getString("giocatore")));
+                }
 
-
-                PdfDocument document = new PdfDocument();
-                PdfDocument.PageInfo pageInfo = new
-                        PdfDocument.PageInfo.Builder(595, 842, 1).create();
-                PdfDocument.Page page = document.startPage(pageInfo);
-                Canvas canvas = page.getCanvas();
-                Paint paint = new Paint();
-
-                canvas.drawText(partita.printA4(), 10, 10, paint);
-
-                document.finishPage(page);
-                document.writeTo(fOut);
                 document.close();
                 Toast.makeText(this, "File salvato come PDF", Toast.LENGTH_SHORT).show();
                 ((DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE))
@@ -505,6 +534,10 @@ public class DettaglioPartita extends AppCompatActivity {
 
             }catch (IOException e){
                 Log.i("error",e.getLocalizedMessage());
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
