@@ -29,6 +29,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -191,6 +192,74 @@ public class DettaglioPartita extends AppCompatActivity {
         eventoAdapter = new EventoAdapter(listaEventi);
         recyclerView.setAdapter(eventoAdapter);
 
+        FloatingActionButton btnUndo = findViewById(R.id.btn_revert);
+        btnUndo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(listaEventi.size() > 0){
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(DettaglioPartita.this);
+                    dialogBuilder.setTitle("Annulla")
+                            .setMessage("Vuoi annullare l'ultima operazione?")
+                            .setCancelable(true)
+                            .setPositiveButton("Annulla", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    annullaUltimoEvento();
+                                }
+                            })
+                            .setNegativeButton("Cancella", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    dialogBuilder.show();
+                }
+            }
+        });
+
+    }
+
+    private void annullaUltimoEvento() {
+        Evento rimosso = listaEventi.remove(listaEventi.size() - 1);
+        switch (rimosso.getTipo()) {
+            case GOL:
+                JSONArray marcatori = partita.getMarcatori();
+                marcatori.remove(partita.getMarcatori().length()-1);
+                partita.setMarcatori(marcatori);
+                if (partita.getSquadraUno().equals(rimosso.getSquadra())) {
+                    partita.setGolSquadraUno(partita.getGolSquadraUno() - 1);
+                } else {
+                    partita.setGolSquadraDue(partita.getGolSquadraDue() - 1);
+                }
+                updateRisultato();
+                eventoAdapter.notifyDataSetChanged();
+                break;
+            case AUTOGOL:
+                marcatori = partita.getMarcatori();
+                marcatori.remove(partita.getMarcatori().length()-1);
+                partita.setMarcatori(marcatori);
+                if (partita.getSquadraUno().equals(rimosso.getSquadra())) {
+                    partita.setGolSquadraDue(partita.getGolSquadraDue() - 1);
+                } else {
+                    partita.setGolSquadraUno(partita.getGolSquadraUno() - 1);
+                }
+                updateRisultato();
+                eventoAdapter.notifyDataSetChanged();
+                break;
+            case AMMONIZIONE:
+                JSONArray ammoniti = partita.getAmmoniti();
+                ammoniti.remove(partita.getAmmoniti().length()-1);
+                partita.setAmmoniti(ammoniti);
+                eventoAdapter.notifyDataSetChanged();
+                break;
+            case ESPULSIONE:
+                JSONArray espulsi = partita.getEspulsi();
+                espulsi.remove(partita.getEspulsi().length()-1);
+                partita.setAmmoniti(espulsi);
+                eventoAdapter.notifyDataSetChanged();
+                break;
+        }
     }
 
     private View.OnClickListener getGolListener(final int nSquadra) {
