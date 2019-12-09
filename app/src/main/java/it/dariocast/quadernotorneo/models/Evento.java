@@ -26,6 +26,7 @@ public class Evento {
     public enum TipoEvento {
         GOL,
         AMMONIZIONE,
-        ESPULSIONE
+        ESPULSIONE,
+        AUTOGOL
     }
 }

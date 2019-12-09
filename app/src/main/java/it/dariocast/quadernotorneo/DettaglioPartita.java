@@ -29,6 +29,10 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.button.MaterialButton;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +64,8 @@ public class DettaglioPartita extends AppCompatActivity {
     List<Evento> listaEventi;
     private EventoAdapter eventoAdapter;
     private TextView risultato;
+    private TextView squadra1;
+    private TextView squadra2;
 
     @Override
     public void onBackPressed() {
@@ -94,6 +100,10 @@ public class DettaglioPartita extends AppCompatActivity {
         risultato = findViewById(R.id.risultato_tv);
         Typeface face= Typeface.createFromAsset(getAssets(), "font.ttf");
         risultato.setTypeface(face);
+        squadra1 = findViewById(R.id.squadra1_tv);
+        squadra1.setTypeface(face);
+        squadra2 = findViewById(R.id.squadra2_tv);
+        squadra2.setTypeface(face);
 
         MaterialButton btnCancella = findViewById(R.id.btn_cancella);
         btnCancella.setOnClickListener(new View.OnClickListener() {
@@ -247,6 +257,72 @@ public class DettaglioPartita extends AppCompatActivity {
             }
         });
     }
+
+    private View.OnClickListener getAutogolListener(final int nSquadra) {
+        List<String> listaDaUsare = null;
+        String squadra = "";
+        switch (nSquadra) {
+            case 1:
+                listaDaUsare = giocatoriSquadraUno;
+                squadra = partita.getSquadraUno();
+                break;
+            case 2:
+                listaDaUsare = giocatoriSquadraDue;
+                squadra = partita.getSquadraDue();
+                break;
+        }
+        final List<String> finalListaDaUsare = listaDaUsare;
+        final String finalSquadra = squadra;
+        return (new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(DettaglioPartita.this)
+                        .setTitle("Autogol")
+                        .setMessage("Scegli il giocatore")
+                        .setCancelable(false);
+                LayoutInflater inflater = DettaglioPartita.this.getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.scegli_giocatore_dialog, null);
+                dialogBuilder.setView(dialogView);
+                final Spinner spinner = dialogView.findViewById(R.id.spinner_giocatore);
+                final ArrayAdapter adapter = new ArrayAdapter(DettaglioPartita.this, android.R.layout.simple_spinner_item, finalListaDaUsare);
+                // Specify the layout to use when the list of choices appears
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // Apply the adapter to the spinner
+                spinner.setAdapter(adapter);
+                dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        try {
+                            JSONArray marcatori = partita.getMarcatori();
+                            JSONObject marcatore = new JSONObject();
+                            marcatore.put("giocatore", spinner.getSelectedItem().toString()+" (Aut)");
+                            marcatore.put("squadra", finalSquadra);
+                            marcatori.put(marcatore);
+                            partita.setMarcatori(marcatori);
+                            if (nSquadra == 1) {
+                                partita.setGolSquadraDue(partita.getGolSquadraDue() + 1);
+                            } else {
+                                partita.setGolSquadraUno(partita.getGolSquadraUno() + 1);
+                            }
+                            updateRisultato();
+                            listaEventi.add(new Evento(spinner.getSelectedItem().toString(), finalSquadra, Evento.TipoEvento.AUTOGOL));
+                            eventoAdapter.notifyDataSetChanged();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        dialog.dismiss();
+                    }
+                });
+                dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogBuilder.show();
+            }
+        });
+    }
+
     private View.OnClickListener getAmmonizioneListener(final int nSquadra) {
         List<String> listaDaUsare = null;
         String squadra = "";
@@ -367,6 +443,8 @@ public class DettaglioPartita extends AppCompatActivity {
     private void updateRisultato() {
         String ris = partita.getGolSquadraUno()+":"+partita.getGolSquadraDue();
         risultato.setText(ris);
+        squadra1.setText(partita.getSquadraUno());
+        squadra2.setText(partita.getSquadraDue());
     }
 
     private void salva() {
@@ -419,16 +497,28 @@ public class DettaglioPartita extends AppCompatActivity {
                             partita = new Partita(response);
                             MaterialButton gol = findViewById(R.id.btn_gol);
                             gol.setOnClickListener(getGolListener(1));
+
                             MaterialButton gol2 = findViewById(R.id.btn_gol_2);
                             gol2.setOnClickListener(getGolListener(2));
+
+                            MaterialButton autogol = findViewById(R.id.btn_autogol);
+                            autogol.setOnClickListener(getAutogolListener(1));
+
+                            MaterialButton autogol2 = findViewById(R.id.btn_autogol_2);
+                            autogol2.setOnClickListener(getAutogolListener(2));
+
                             MaterialButton ammonisci = findViewById(R.id.btn_ammonisci);
                             ammonisci.setOnClickListener(getAmmonizioneListener(1));
+
                             MaterialButton ammonisci2 = findViewById(R.id.btn_ammonisci_2);
                             ammonisci2.setOnClickListener(getAmmonizioneListener(2));
+
                             MaterialButton espelli = findViewById(R.id.btn_espelli);
                             espelli.setOnClickListener(getEspulsioneListener(1));
+
                             MaterialButton espelli2 = findViewById(R.id.btn_espelli_2);
                             espelli2.setOnClickListener(getEspulsioneListener(2));
+
                             updateRisultato();
                             updateListaEventi();
                             getGiocatori();
@@ -449,17 +539,24 @@ public class DettaglioPartita extends AppCompatActivity {
     }
 
     private void updateListaEventi() throws JSONException{
+        listaEventi.clear();
         JSONArray marcatori = partita.getMarcatori();
         for (int i = 0; i<marcatori.length();i++) {
-            listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.GOL));
+            String nome = marcatori.getJSONObject(i).getString("giocatore");
+            if (nome.contains("(Aut)")) {
+                nome = nome.subSequence(0,nome.indexOf(" (Aut)")).toString();
+                listaEventi.add(new Evento(nome,marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.AUTOGOL));
+            } else {
+                listaEventi.add(new Evento(nome,marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.GOL));
+            }
         }
         JSONArray ammoniti = partita.getAmmoniti();
         for (int i = 0; i<ammoniti.length();i++) {
-            listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.AMMONIZIONE));
+            listaEventi.add(new Evento(ammoniti.getJSONObject(i).getString("giocatore"),ammoniti.getJSONObject(i).getString("squadra"), Evento.TipoEvento.AMMONIZIONE));
         }
         JSONArray espulsi = partita.getEspulsi();
         for (int i = 0; i<espulsi.length();i++) {
-            listaEventi.add(new Evento(marcatori.getJSONObject(i).getString("giocatore"),marcatori.getJSONObject(i).getString("squadra"), Evento.TipoEvento.ESPULSIONE));
+            listaEventi.add(new Evento(espulsi.getJSONObject(i).getString("giocatore"),espulsi.getJSONObject(i).getString("squadra"), Evento.TipoEvento.ESPULSIONE));
         }
         eventoAdapter.notifyDataSetChanged();
     }
@@ -474,22 +571,40 @@ public class DettaglioPartita extends AppCompatActivity {
             }
             try {
                 String filename = "partita"+partita.getId()+".pdf";
-                final File file = new File(folder, filename);
-                file.createNewFile();
-                FileOutputStream fOut = new FileOutputStream(file);
+                File file = new File(folder, filename);
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                String separator = "-------------------------------";
+                Document document = new Document();
+                PdfWriter.getInstance(document,
+                        new FileOutputStream(file.getAbsoluteFile()));
+                document.open();
+                document.add(new Paragraph(partita.getSquadraUno()));
+                for (int i=0;i<giocatoriSquadraUno.size();i++) {
+                    document.add(new Paragraph(giocatoriSquadraUno.get(i)));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph(partita.getSquadraDue()));
+                for (int i=0;i<giocatoriSquadraDue.size();i++) {
+                    document.add(new Paragraph(giocatoriSquadraDue.get(i)));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Gol"));
+                for (int i=0;i<partita.getMarcatori().length();i++) {
+                    document.add(new Paragraph(partita.getMarcatori().getJSONObject(i).getString("giocatore")));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Ammoniti"));
+                for (int i=0;i<partita.getAmmoniti().length();i++) {
+                    document.add(new Paragraph(partita.getAmmoniti().getJSONObject(i).getString("giocatore")));
+                }
+                document.add(new Paragraph(separator));
+                document.add(new Paragraph("Espulsi"));
+                for (int i=0;i<partita.getEspulsi().length();i++) {
+                    document.add(new Paragraph(partita.getEspulsi().getJSONObject(i).getString("giocatore")));
+                }
 
-
-                PdfDocument document = new PdfDocument();
-                PdfDocument.PageInfo pageInfo = new
-                        PdfDocument.PageInfo.Builder(595, 842, 1).create();
-                PdfDocument.Page page = document.startPage(pageInfo);
-                Canvas canvas = page.getCanvas();
-                Paint paint = new Paint();
-
-                canvas.drawText(partita.printA4(), 10, 10, paint);
-
-                document.finishPage(page);
-                document.writeTo(fOut);
                 document.close();
                 Toast.makeText(this, "File salvato come PDF", Toast.LENGTH_SHORT).show();
                 ((DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE))
@@ -505,6 +620,10 @@ public class DettaglioPartita extends AppCompatActivity {
 
             }catch (IOException e){
                 Log.i("error",e.getLocalizedMessage());
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
