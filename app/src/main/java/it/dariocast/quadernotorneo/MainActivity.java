@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import it.dariocast.quadernotorneo.models.Partita;
 
 import android.view.LayoutInflater;
@@ -26,6 +27,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.CalendarView;
+import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -34,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -83,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 LayoutInflater inflater = MainActivity.this.getLayoutInflater();
                 final View dialogView = inflater.inflate(R.layout.scegli_squadre_dialog, null);
                 dialogBuilder.setView(dialogView);
+                final DatePicker datePicker = dialogView.findViewById(R.id.date_picker);
                 final Spinner spinner = dialogView.findViewById(R.id.spinner_squadra_uno);
                 final Spinner spinner2 = dialogView.findViewById(R.id.spinner_squadra_due);
                 final ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_spinner_item, gruppi);
@@ -94,7 +99,11 @@ public class MainActivity extends AppCompatActivity {
                 dialogBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         try {
-                            creaPartita(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString());
+                            Calendar cal = Calendar.getInstance();
+                            cal.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+                            cal.set(Calendar.MONTH, datePicker.getMonth());
+                            cal.set(Calendar.YEAR, datePicker.getYear());
+                            creaPartita(spinner.getSelectedItem().toString(), spinner2.getSelectedItem().toString(), cal.getTimeInMillis()/1000);
                         } catch (JSONException e) {
                             Toast.makeText(MainActivity.this, "Errore durante la creazione. Riprova", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
@@ -111,9 +120,19 @@ public class MainActivity extends AppCompatActivity {
                 dialogBuilder.show();
             }
         });
+
+        final SwipeRefreshLayout swipeLayout = findViewById(R.id.swipe_view);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadPartite();
+                loadGruppi();
+                swipeLayout.setRefreshing(false);
+            }
+        });
     }
 
-    private void creaPartita(String squadra1, String squadra2) throws JSONException {
+    private void creaPartita(String squadra1, String squadra2, long date) throws JSONException {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         String url ="https://dariocast.altervista.org/fantazama/api/partita/create.php";
@@ -121,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         JSONObject jsonRepr = new JSONObject();
         jsonRepr.put("squadraUno",squadra1);
         jsonRepr.put("squadraDue",squadra2);
+        jsonRepr.put("data",date);
         // Request a string response from the provided URL.
         JsonObjectRequest stringRequest = new JsonObjectRequest(Request.Method.POST, url, jsonRepr,
                 new Response.Listener<JSONObject>() {
@@ -227,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_refresh) {
             loadPartite();
             loadGruppi();
         }
