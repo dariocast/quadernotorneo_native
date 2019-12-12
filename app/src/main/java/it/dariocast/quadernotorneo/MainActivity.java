@@ -251,8 +251,20 @@ public class MainActivity extends AppCompatActivity {
             loadPartite();
             loadGruppi();
         }
+        if (id == R.id.calcola_classifica) {
+            calcolaClassifica();
+        }
+        if (id == R.id.reset_classifica) {
+            resetClassifica();
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void resetClassifica() {
+    }
+
+    private void calcolaClassifica() {
     }
 
     @Override
