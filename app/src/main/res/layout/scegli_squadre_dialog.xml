@@ -6,7 +6,8 @@
     <DatePicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/date_picker" />
+        android:id="@+id/date_picker"
+        android:datePickerMode="spinner"/>
 
     <Spinner
         android:id="@+id/spinner_squadra_uno"
