@@ -12,4 +12,6 @@
     <string name="quaderno">Quaderno del Torneo</string>
     <string name="salva">Salva</string>
     <string name="autogol">Autogol</string>
+    <string name="action_reset">Reset classifica</string>
+    <string name="action_calcola">Calcola classifica</string>
 </resources>

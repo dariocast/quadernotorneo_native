@@ -4,9 +4,9 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "it.dariocast.quadernotorneo"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 28
-        versionCode 2
+        versionCode 3
         versionName "Arturo Aiello"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
