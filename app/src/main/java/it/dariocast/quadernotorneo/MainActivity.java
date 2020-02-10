@@ -266,26 +266,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void aggiornaMarcatori() {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        String url ="https://dariocast.altervista.org/fantazama/api/admin/aggiornaMarcatori.php";
+        Toast.makeText(MainActivity.this, "Questa funzione non è ancora disponibile", Toast.LENGTH_SHORT).show();
 
-        // Request a string response from the provided URL.
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        Toast.makeText(MainActivity.this, "Marcatori aggiornati con successo", Toast.LENGTH_SHORT).show();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MainActivity.this, "Impossibile aggiornare i marcatori, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        queue.add(jsonArrayRequest);
+//        // Instantiate the RequestQueue.
+//        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//        String url ="https://dariocast.altervista.org/fantazama/api/admin/aggiornaMarcatori.php";
+//
+//        // Request a string response from the provided URL.
+//        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+//                new Response.Listener<JSONArray>() {
+//                    @Override
+//                    public void onResponse(JSONArray response) {
+//                        Toast.makeText(MainActivity.this, "Marcatori aggiornati con successo", Toast.LENGTH_SHORT).show();
+//                    }
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Toast.makeText(MainActivity.this, "Impossibile aggiornare i marcatori, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        // Add the request to the RequestQueue.
+//        queue.add(jsonArrayRequest);
 
     }
 
