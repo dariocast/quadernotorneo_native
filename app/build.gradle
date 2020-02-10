@@ -6,8 +6,8 @@ android {
         applicationId "it.dariocast.quadernotorneo"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 3
-        versionName "Arturo Aiello"
+        versionCode 4
+        versionName "Mons Antonio Zama"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

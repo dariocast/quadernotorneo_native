@@ -8,6 +8,11 @@
         android:title="@string/action_refresh"
         app:showAsAction="never" />
     <item
+        android:id="@+id/aggiorna_marcatori"
+        android:orderInCategory="100"
+        android:title="@string/action_reset"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/calcola_classifica"
         android:orderInCategory="100"
         android:title="@string/action_calcola"

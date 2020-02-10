@@ -10,8 +10,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -251,19 +253,87 @@ public class MainActivity extends AppCompatActivity {
             loadGruppi();
         }
         if (id == R.id.calcola_classifica) {
+            resetClassifica();
             calcolaClassifica();
         }
         if (id == R.id.reset_classifica) {
             resetClassifica();
         }
+        if (id == R.id.aggiorna_marcatori) {
+            aggiornaMarcatori();
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void aggiornaMarcatori() {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url ="https://dariocast.altervista.org/fantazama/api/admin/aggiornaMarcatori.php";
+
+        // Request a string response from the provided URL.
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Toast.makeText(MainActivity.this, "Marcatori aggiornati con successo", Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Impossibile aggiornare i marcatori, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        queue.add(jsonArrayRequest);
+
+    }
+
     private void resetClassifica() {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url ="https://dariocast.altervista.org/fantazama/api/admin/resetDB.php?password=232323";
+
+        // Request a string response from the provided URL.
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Toast.makeText(MainActivity.this, "Classifica resettata con successo", Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Impossibile resettare la classifica, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        queue.add(jsonArrayRequest);
     }
 
     private void calcolaClassifica() {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        String url ="https://dariocast.altervista.org/fantazama/api/admin/aggiornaDB.php?password=232323";
+
+        // Request a string response from the provided URL.
+        StringRequest jsonArrayRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(MainActivity.this, "Classifica aggiornata con successo", Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, "Impossibile aggiornare la classifica, errore: "+error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        queue.add(jsonArrayRequest);
     }
 
     @Override
