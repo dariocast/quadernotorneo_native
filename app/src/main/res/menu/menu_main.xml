@@ -10,7 +10,7 @@
     <item
         android:id="@+id/aggiorna_marcatori"
         android:orderInCategory="100"
-        android:title="@string/action_reset"
+        android:title="@string/action_marcatori"
         app:showAsAction="never" />
     <item
         android:id="@+id/calcola_classifica"

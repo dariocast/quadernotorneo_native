@@ -253,7 +253,6 @@ public class MainActivity extends AppCompatActivity {
             loadGruppi();
         }
         if (id == R.id.calcola_classifica) {
-            resetClassifica();
             calcolaClassifica();
         }
         if (id == R.id.reset_classifica) {
